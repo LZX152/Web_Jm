@@ -1,0 +1,3 @@
+paths:
+  upload_dir: "./books"
+  option_file: "./config.yml"

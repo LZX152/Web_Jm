@@ -1,0 +1,47 @@
+# Github Actions 下载脚本配置
+version: '2.0'
+
+log: true
+
+dir_rule:
+  base_dir: E:/tools/image2pdf-main/books
+  rule: Bd_Atitle_Pindex
+
+client:
+  domain: []
+
+download:
+  cache: true # 如果要下载的文件在磁盘上已存在，不用再下一遍了吧？
+  image:
+    decode: true # JM的原图是混淆过的，要不要还原？
+    suffix: .jpg # 把图片都转为.jpg格式
+  threading:
+    # batch_count: 章节的批量下载图片线程数
+    # 数值大，下得快，配置要求高，对禁漫压力大
+    # 数值小，下得慢，配置要求低，对禁漫压力小
+    # PS: 禁漫网页一般是一次请求50张图
+    batch_count: 45
+
+# 插件的配置示例
+plugins:
+  after_init:
+
+
+  after_album:
+    - plugin: delete_duplicated_files
+      kwargs:
+        # limit: 必填，表示对md5出现次数的限制
+        limit: 3
+        # 如果文件的md5的出现次数 >= limit，是否要删除
+        # 如果delete_original_file不配置，此插件只会打印信息，不会执行其他操作
+        # 如果limit=1, delete_original_file=true 效果会是删除所有文件
+        delete_original_file: true
+    - plugin: img2pdf
+      kwargs:
+        pdf_dir: E:/tools/image2pdf-main/books/pdf # pdf存放文件夹
+        filename_rule: Atitle # pdf命名规则，P代表photo, id代表使用photo.id也就是章节id
+
+  before_photo:
+    - plugin: skip_photo_with_few_images # 跳过下载章节图片数量过少的章节。一些韩漫的章节是公告，没有实际内容，就可以用该插件来跳过下载这些章节。
+      kwargs:
+        at_least_image_count: 3 # 至少要有多少张图，才下载此章节
