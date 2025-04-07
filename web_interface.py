@@ -305,7 +305,6 @@ def list_pdfs():
             return "PDF目录不存在", 404
             
         files = []
-        # 列出所有PDF文件
         pdf_files = list(pdf_dir.glob("*.pdf"))
         print(f"找到 {len(pdf_files)} 个PDF文件")
         
@@ -317,10 +316,14 @@ def list_pdfs():
                 files.append({
                     'name': file.name,
                     'size': f"{size / 1024 / 1024:.2f} MB",
-                    'modified': datetime.fromtimestamp(modified).strftime('%Y-%m-%d %H:%M:%S')
+                    'modified': datetime.fromtimestamp(modified).strftime('%Y-%m-%d %H:%M:%S'),
+                    'modified_timestamp': modified  # 添加时间戳用于排序
                 })
             except Exception as e:
                 print(f"处理文件 {file.name} 时出错: {str(e)}")
+        
+        # 按修改时间降序排序
+        files.sort(key=lambda x: x['modified_timestamp'], reverse=True)
         
         if not files:
             return render_template_string('''
